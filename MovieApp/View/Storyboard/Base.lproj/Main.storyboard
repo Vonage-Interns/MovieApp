@@ -23,7 +23,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="UjL-6Q-umd" userLabel="vertical stack">
                                 <rect key="frame" x="35.666666666666657" y="346" width="331" height="182"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="username" textAlignment="natural" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ubr-xL-m9z">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ubr-xL-m9z">
                                         <rect key="frame" x="0.0" y="0.0" width="331" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="1kR-gy-npk"/>
@@ -32,9 +32,9 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="passoword" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="oS3-gA-epw">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="oS3-gA-epw">
                                         <rect key="frame" x="0.0" y="66" width="331" height="50"/>
-                                        <nil key="textColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3fr-xu-yDz">
@@ -92,8 +92,8 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="emailTextField" destination="Ubr-xL-m9z" id="MqN-96-AOW"/>
                         <outlet property="passwordTextField" destination="oS3-gA-epw" id="D1h-yu-Mhh"/>
-                        <outlet property="usernameTextField" destination="Ubr-xL-m9z" id="MqN-96-AOW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -113,9 +113,9 @@
                                 <color key="backgroundColor" red="0.71372549019999998" green="0.68235294120000001" blue="0.62352941179999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="lRA-8S-tL9" userLabel="horozontal stack">
-                                <rect key="frame" x="35.666666666666657" y="338" width="331" height="198"/>
+                                <rect key="frame" x="35.666666666666657" y="301" width="331" height="272"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="usersignup" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yqW-QL-Neg">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yqW-QL-Neg">
                                         <rect key="frame" x="0.0" y="0.0" width="331" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="331" id="51h-3i-THG"/>
@@ -124,13 +124,22 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="passoword" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="tIU-xW-iLM">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="yyl-il-NpZ">
                                         <rect key="frame" x="0.0" y="74" width="331" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="hL8-Ea-IYp"/>
+                                            <constraint firstAttribute="width" constant="331" id="iKW-n4-ikK"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="tIU-xW-iLM">
+                                        <rect key="frame" x="0.0" y="148" width="331" height="50"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dby-2b-Zsg">
-                                        <rect key="frame" x="0.0" y="148" width="331" height="50"/>
+                                        <rect key="frame" x="0.0" y="222" width="331" height="50"/>
                                         <color key="backgroundColor" red="0.27450981740000002" green="0.26274511220000002" blue="0.25490197539999998" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <state key="normal" title="Button"/>
@@ -173,6 +182,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="emailTextField" destination="yyl-il-NpZ" id="fBB-Qu-0Xx"/>
                         <outlet property="passwordTextField" destination="tIU-xW-iLM" id="gJ3-G3-cow"/>
                         <outlet property="usernameTextField" destination="yqW-QL-Neg" id="Doe-ll-tAe"/>
                     </connections>

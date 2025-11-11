@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     let username: String
+    
     let onLogout: () -> Void
     @State private var showLogoutConfirm = false
     

@@ -16,10 +16,7 @@ class APIManager {
             print("Missing OMDB_API_KEY in Info.plist")
             return
         }
-        print(ProcessInfo.processInfo.environment)
-        
-        print(search)
-
+   
 
         let urlString = "http://www.omdbapi.com/?apikey=\(apiKey)&s=\(search)&page=\(page)"
         guard let url = URL(string: urlString) else { return }
@@ -37,7 +34,6 @@ class APIManager {
             do {
                 let decoded = try JSONDecoder().decode(MovieResponse.self, from: data)
                 completion(.success(decoded.search ?? []))
-                print(decoded)
             } catch {
                 completion(.failure(error))
             }

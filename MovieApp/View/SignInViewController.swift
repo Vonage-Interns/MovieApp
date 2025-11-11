@@ -11,10 +11,7 @@ import SwiftUI
 
 class SignInViewController: UIViewController {
 
-  
-
-    
-    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
 
     let viewModel = SignInViewModel()
@@ -26,25 +23,26 @@ class SignInViewController: UIViewController {
 
 
     @IBAction func signInTapped(_ sender: UIButton) {
-        // Validate input
-        guard let username = usernameTextField.text, !username.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty else {
-            showAlert("Please enter username and password")
+        // Validate input (textfield currently holds email)
+        guard let emailInput = emailTextField.text, !emailInput.isEmpty,
+              let passwordInput = passwordTextField.text, !passwordInput.isEmpty else {
+            showAlert("Please enter email and password")
             return
         }
-        // Authenticate user
-        if viewModel.validateUser(username: username, password: password) {
-            let homeView = HomeView(username: username, onLogout: { [weak self] in
+        
+        // Authenticate user using email + password
+        if viewModel.validateUser(email: emailInput, password: passwordInput) {
+            // Fetch stored username for this email (fallback to entered email)
+            let displayUsername = viewModel.fetchUsername(forEmail: emailInput) ?? emailInput
+            // Present HomeView with real username
+            let homeView = HomeView(username: displayUsername, onLogout: { [weak self] in
                 self?.dismiss(animated: true)
-            }) // Create SwiftUI view
-            
-            let hostingController = UIHostingController(rootView: homeView)// Wrap SwiftUI view
-            hostingController.modalPresentationStyle = .fullScreen // Present full screen
+            })
+            let hostingController = UIHostingController(rootView: homeView)
+            hostingController.modalPresentationStyle = .fullScreen
             present(hostingController, animated: true)
-        }
-        else {
-            showAlert ("Invalid credentials")
-
+        } else {
+            showAlert("Invalid credentials")
         }
     }
     
@@ -52,18 +50,10 @@ class SignInViewController: UIViewController {
         print("Go to Sign Up button tapped")
 
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let signUpVC = storyboard.instantiateViewController(withIdentifier: "SignUpVC") as? UIViewController {
-            self.present(signUpVC, animated: true)
-        }
+        // Instantiate directly; storyboard returns a UIViewController. If identifier is wrong this will crash, which is fine for development.
+        let signUpVC = storyboard.instantiateViewController(withIdentifier: "SignUpVC")
+        present(signUpVC, animated: true)
     }
-    
-    
-    // Helper to show alerts
-//    func showAlert(_ message: String) {
-//        let alert = UIAlertController(title: "Info", message: message, preferredStyle: .alert)
-//        alert.addAction(UIAlertAction(title: "OK", style: .default))
-//        present(alert, animated: true)
-//    }
     
     @IBAction func showAllUsers(_ sender: UIButton) {
         let context = CoreDataManager.shared.context
@@ -71,7 +61,7 @@ class SignInViewController: UIViewController {
         do {
             let users = try context.fetch(fetchRequest)
             for user in users {
-                let username = user.value(forKey: "username") as? String ?? ""
+                let username = user.value(forKey: "email") as? String ?? ""
                 let password = user.value(forKey: "password") as? String ?? ""
                 print("\(username) — \(password)")
             }
@@ -79,8 +69,4 @@ class SignInViewController: UIViewController {
             print("Error fetching users: \(error)")
         }
     }
-
-    
-    
-
 }

@@ -21,21 +21,22 @@
     self.viewModel = [[SignUpViewModel alloc] init];
 }
 
-- (IBAction)BacktoSignIn:(id)sender {
-}
+
 
 - (IBAction)signUpTapped:(id)sender {
     NSString *username = self.usernameTextField.text;
+    NSString *email = self.emailTextField.text;
     NSString *password = self.passwordTextField.text;
     
+    
 
-    NSString *validationError = [self.viewModel validateInputsWithUsername:username password:password];
+    NSString *validationError = [self.viewModel validateInputsWithUsername:username password:password email:email];
     if (validationError) {
         [self showAlert:validationError];
         return;
     }
     
-    BOOL success = [self.viewModel registerUserWithUsername:username password:password];
+    BOOL success = [self.viewModel registerUserWithUsername:username password:password email:email];
     if (success) {
         [self showAlert:@"Sign Up Successful!" dismissOnOK:YES]; // Dismiss after user taps OK
     } else {

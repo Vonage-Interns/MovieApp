@@ -18,38 +18,59 @@ import CryptoKit //for hashing password
     }
         
     
-    @objc func validateInputs(username: String?, password: String?) -> String? { //why objc : to expose to objective c
-        guard let username = username, !username.isEmpty else {
+    @objc func validateInputs(username: String?, password: String?, email: String?) -> String? { //why objc : to expose to objective c
+       // Combine username, email and password for empty validation and basic rules
+        let trimmedUsername = username?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password?.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard let username = trimmedUsername, !username.isEmpty else {
             return "Username cannot be empty"
         }
-        guard let password = password, !password.isEmpty else {
+        guard let email = trimmedEmail, !email.isEmpty else {
+            return "Email cannot be empty"
+        }
+        guard let password = trimmedPassword, !password.isEmpty else {
             return "Password cannot be empty"
         }
-        //write for username and password should be grater than 5
         if username.count < 5 || password.count < 5 {
             return "Username and Password must be at least 5 characters long"
         }
-        return nil // means valid
+        // Simple email regex validation
+        let emailPattern = "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        let emailRegex = try! NSRegularExpression(pattern: emailPattern)
+        let range = NSRange(location: 0, length: email.utf16.count)
+        if emailRegex.firstMatch(in: email, options: [], range: range) == nil {
+            return "Invalid email format"
+        }
+        return nil // valid
     }
     
-    @objc func registerUser(username: String, password: String) -> Bool {
+    @objc func registerUser(username: String, password: String, email: String) -> Bool {
         let context = CoreDataManager.shared.context
+        // Normalize inputs (trim + lowercase email)
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        
         let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "User")
-        fetchRequest.predicate = NSPredicate(format: "username == %@", username) //check if user already exists
+        // Case-insensitive uniqueness check
+        fetchRequest.predicate = NSPredicate(format: "email ==[c] %@", trimmedEmail)
         
         do {
-            let existing = try context.fetch(fetchRequest)
-            if !existing.isEmpty {
+            if try context.count(for: fetchRequest) > 0 {
                 print("User already exists.")
                 return false
             }
-            
-            let entity = NSEntityDescription.entity(forEntityName: "User", in: context)!
+            guard let entity = NSEntityDescription.entity(forEntityName: "User", in: context) else {
+                print("User entity not found")
+                return false
+            }
             let user = NSManagedObject(entity: entity, insertInto: context)
-            user.setValue(username, forKey: "username")
-            
-            //hash password before saving
-            let hashedPassword = hashPassword(password)
+            user.setValue(trimmedUsername, forKey: "username")
+            user.setValue(trimmedEmail, forKey: "email")
+            user.setValue(UUID(), forKey: "id") // Store UUID attribute
+            let hashedPassword = hashPassword(trimmedPassword)
             user.setValue(hashedPassword, forKey: "password")
             try context.save()
             return true
@@ -59,4 +80,3 @@ import CryptoKit //for hashing password
         }
     }
 }
-

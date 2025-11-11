@@ -31,13 +31,22 @@ class MovieListViewModel: ObservableObject { // what  is observableobject: A pro
                 }
             }
             .store(in: &cancellables)
+        // Preload any cached movies for initial/default query before first network call
+        preloadCached()
+    }
+    
+    private func currentQueryOrDefault() -> String { searchQuery.isEmpty ? "Batman" : searchQuery }
+    
+    private func preloadCached() {
+        let cached = CoreDataManager.shared.loadCachedMovies(search: currentQueryOrDefault())
+        if !cached.isEmpty { movies = cached }
     }
     
     func fetchMovies() {
         guard !isLoading, canLoadMore else { return }
         isLoading = true
 
-        APIManager.shared.fetchMovies(search: searchQuery.isEmpty ? "Batman" : searchQuery, page: page) { result in
+        APIManager.shared.fetchMovies(search: currentQueryOrDefault(), page: page) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
                 switch result {
@@ -46,10 +55,17 @@ class MovieListViewModel: ObservableObject { // what  is observableobject: A pro
                         self.canLoadMore = false
                     } else {
                         self.movies.append(contentsOf: fetchedMovies)
+                        // Persist newly fetched movies (avoid duplicates)
+                        CoreDataManager.shared.upsertMovies(fetchedMovies)
                         self.page += 1
                     }
                 case .failure(let error):
                     print("Error fetching movies: \(error)")
+                    // Offline / failure fallback: show cached if we currently have none
+                    if self.movies.isEmpty {
+                        let cached = CoreDataManager.shared.loadCachedMovies(search: self.currentQueryOrDefault())
+                        if !cached.isEmpty { self.movies = cached }
+                    }
                 }
             }
         }
@@ -59,6 +75,7 @@ class MovieListViewModel: ObservableObject { // what  is observableobject: A pro
         page = 1
         movies.removeAll()
         canLoadMore = true
+        preloadCached() // show cached instantly while network fetch occurs
         fetchMovies()
     }
 }
