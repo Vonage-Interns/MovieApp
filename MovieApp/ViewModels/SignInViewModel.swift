@@ -51,4 +51,15 @@ class SignInViewModel {
               !storedUsername.isEmpty else { return nil }
         return storedUsername
     }
+    // Fetch user ID (UUID) for a given email
+    func fetchUserID(forEmail email: String) -> String? { // Return user UUID as String
+        let context = CoreDataManager.shared.context
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let fetch = NSFetchRequest<NSManagedObject>(entityName: "User")
+        fetch.predicate = NSPredicate(format: "email ==[c] %@", normalizedEmail)
+        fetch.fetchLimit = 1
+        guard let obj = try? context.fetch(fetch).first,
+              let id = obj.value(forKey: "id") as? UUID else { return nil }
+        return id.uuidString
+    }
 }

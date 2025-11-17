@@ -5,36 +5,36 @@
 //  Handles fetching detailed movie information by imdbID.
 
 import Foundation
-import Combine
+//import Combine
 
+@MainActor
 class MovieDetailViewModel: ObservableObject {
     @Published var detail: MovieDetail?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     
     private let imdbID: String
-    private var cancellables = Set<AnyCancellable>()
     
     init(imdbID: String) {
         self.imdbID = imdbID
-        fetchDetail()
+        fetchDetail() // kick off initial load via Task wrapper
     }
     
+    // Public convenience wrapper for UI buttons (Retry)
     func fetchDetail() {
+        Task { await loadDetail() }
+    }
+    
+    private func loadDetail() async {
         guard !isLoading else { return }
         isLoading = true
         errorMessage = nil
-        APIManager.shared.fetchMovieDetail(imdbID: imdbID) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.isLoading = false
-                switch result {
-                case .success(let detail):
-                    self.detail = detail
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                }
-            }
+        do {
+            let detail = try await APIManager.shared.fetchMovieDetail(imdbID: imdbID)
+            self.detail = detail
+        } catch {
+            errorMessage = error.localizedDescription
         }
+        isLoading = false
     }
 }

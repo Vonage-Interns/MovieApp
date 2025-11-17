@@ -43,6 +43,7 @@
         [self showAlert:@"User already exists or failed to save"]; // Stay for correction
     }
 }
+
 // Navigate back to Sign In screen
 - (IBAction)BacktoSignInpressed:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];

@@ -50,5 +50,6 @@ struct FavoritesView: View {
             }
             .navigationTitle("Favorites")
         }
+    
     }
 }

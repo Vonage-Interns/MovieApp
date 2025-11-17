@@ -18,6 +18,7 @@ struct Movie: Codable, Identifiable, Equatable {
     let poster: String
 
     //Maps JSON keys to your Swift property nam
+    // what are coding keys?:
     enum CodingKeys: String, CodingKey {
         case title = "Title"
         case year = "Year"

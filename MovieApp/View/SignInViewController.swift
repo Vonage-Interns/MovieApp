@@ -32,10 +32,14 @@ class SignInViewController: UIViewController {
         
         // Authenticate user using email + password
         if viewModel.validateUser(email: emailInput, password: passwordInput) {
+            guard let userID = viewModel.fetchUserID(forEmail: emailInput) else {
+                showAlert("Unable to load user ID")
+                return
+            }
             // Fetch stored username for this email (fallback to entered email)
             let displayUsername = viewModel.fetchUsername(forEmail: emailInput) ?? emailInput
-            // Present HomeView with real username
-            let homeView = HomeView(username: displayUsername, onLogout: { [weak self] in
+            // Present HomeView with real username and also passing userID
+            let homeView = HomeView(username: displayUsername, userID: userID, onLogout: { [weak self] in
                 self?.dismiss(animated: true)
             })
             let hostingController = UIHostingController(rootView: homeView)
@@ -58,15 +62,17 @@ class SignInViewController: UIViewController {
     @IBAction func showAllUsers(_ sender: UIButton) {
         let context = CoreDataManager.shared.context
         let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "User")
+
         do {
-            let users = try context.fetch(fetchRequest)
-            for user in users {
-                let username = user.value(forKey: "email") as? String ?? ""
-                let password = user.value(forKey: "password") as? String ?? ""
-                print("\(username) — \(password)")
+            let userObjects = try context.fetch(fetchRequest)
+            let appUsers = userObjects.compactMap { AppUser(managedObject: $0) } // Appuser extension
+
+            for user in appUsers {
+                print("\(user.email) — \(user.hashedPassword)")
             }
         } catch {
             print("Error fetching users: \(error)")
         }
     }
+
 }

@@ -3,7 +3,6 @@
 //  MovieApp
 //
 //  Created by Shreeshailgouda Patil on 05/11/25.
-//
 
 import SwiftUI
 import Kingfisher
@@ -68,14 +67,7 @@ struct MoviesListView: View {
             .navigationTitle("Movies")
             .searchable(text: $viewModel.searchQuery, prompt: "Search movies")
             .onAppear { viewModel.fetchMovies() } // Initial fetch
-            .onChange(of: favoritesManager.milestoneMessage) { newValue in
-                showMilestoneAlert = newValue != nil
-            }
-            .alert("Congratulations!", isPresented: $showMilestoneAlert) {
-                Button("OK") { favoritesManager.clearMilestone() }
-            } message: {
-                Text(favoritesManager.milestoneMessage ?? "")
-            }
+      
         } // End NavigationView
         
     }

@@ -8,12 +8,12 @@
 import Foundation
 import CoreData
 
-@objcMembers
+@objcMembers // Expose all members to Objective-C
 class CoreDataManager: NSObject { // Exposed to Objective-C
     static let shared = CoreDataManager()
     private override init() { super.init() }
     
-    lazy var persistentContainer: NSPersistentContainer = { // what is lazy: 
+    lazy var persistentContainer: NSPersistentContainer = { // what is lazy:
         let container = NSPersistentContainer(name: "MovieApp")
         container.loadPersistentStores { (_, error) in
             if let error = error { fatalError("Core Data error: \(error)") }
@@ -38,9 +38,9 @@ class CoreDataManager: NSObject { // Exposed to Objective-C
             let incomingIDs = movies.map { $0.imdbID }
             // Fetch existing managed objects (avoid dictionary result type mismatch)
             let fetch = NSFetchRequest<NSManagedObject>(entityName: "Movies")
-            fetch.predicate = NSPredicate(format: "imdbID IN %@", incomingIDs)
+            fetch.predicate = NSPredicate(format: "imdbID IN %@", incomingIDs) //
             fetch.resultType = .managedObjectResultType
-            var existing: Set<String> = []
+            var existing: Set<String> = [] // to track existing imdbIDs
             if let objs = try? ctx.fetch(fetch) {
                 existing = Set(objs.compactMap { $0.value(forKey: "imdbID") as? String })
             }
@@ -79,6 +79,62 @@ class CoreDataManager: NSObject { // Exposed to Objective-C
             }
         } catch {
             print("Load cached movies failed: \(error)")
+            return []
+        }
+    }
+    
+    //add the favorities
+    func addToFavorites(movie: Movie, for userID: String) { // userID stored as String in Core Data
+        let ctx = context
+        let fetch = NSFetchRequest<NSManagedObject>(entityName: "Favorite")
+        fetch.predicate = NSPredicate(format: "userID == %@ AND movieID == %@", userID, movie.imdbID)
+        fetch.fetchLimit = 1
+        if let existing = try? ctx.fetch(fetch), !existing.isEmpty { return }
+        guard let entity = NSEntityDescription.entity(forEntityName: "Favorite", in: ctx) else { return }
+        let favorite = NSManagedObject(entity: entity, insertInto: ctx)
+        favorite.setValue(UUID(), forKey: "id")
+        favorite.setValue(movie.imdbID, forKey: "movieID")
+        favorite.setValue(movie.title, forKey: "title")
+        favorite.setValue(movie.poster, forKey: "poster")
+        favorite.setValue(movie.year, forKey: "year")
+        favorite.setValue(userID, forKey: "userID")
+        favorite.setValue(Date(), forKey: "timestamp")
+        do { try ctx.save(); print("Favorite added for user \(userID)") } catch { print(" Error saving favorite: \(error)") }
+    }
+    
+    //remove the favorities
+    func removeFromFavorites(movieID: String, for userID: String) {
+        let ctx = context
+        let fetch = NSFetchRequest<NSManagedObject>(entityName: "Favorite")
+        fetch.predicate = NSPredicate(format: "userID == %@ AND movieID == %@", userID, movieID)
+        do {
+            let results = try ctx.fetch(fetch)
+            for obj in results {
+                ctx.delete(obj)
+            }
+            try ctx.save()
+            print("Favorite removed for user \(userID)")
+        } catch {
+            print("Error removing favorite: \(error)")
+        }
+    }
+    
+    // Fetch favorites for a given user, mapped back to Movie (type left blank as Favorite may not store it)
+    func fetchFavorites(for userID: String) -> [Movie] { // Fetch by String userID
+        let ctx = context
+        let request = NSFetchRequest<NSManagedObject>(entityName: "Favorite")
+        request.predicate = NSPredicate(format: "userID == %@", userID)
+        do {
+            let results = try ctx.fetch(request)
+            return results.compactMap { obj in
+                guard let movieID = obj.value(forKey: "movieID") as? String,
+                      let title = obj.value(forKey: "title") as? String,
+                      let poster = obj.value(forKey: "poster") as? String,
+                      let year = obj.value(forKey: "year") as? String else { return nil }
+                return Movie(title: title, year: year, imdbID: movieID, type: "", poster: poster)
+            }
+        } catch {
+            print("Error fetching favorites: \(error)")
             return []
         }
     }

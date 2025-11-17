@@ -6,32 +6,21 @@
 //
 
 import Foundation
-import Combine // Added for debounce
+import SwiftUI // SwiftUI re-exports ObservableObject & @Published
 
-class MovieListViewModel: ObservableObject { // what  is observableobject: A protocol from Combine framework that allows a class to be observed for changes. When properties marked with @Published change, any SwiftUI views observing this object will automatically update to reflect those changes.
-    
-    @Published var movies: [Movie] = [] // ui will observe this array for changes
-    @Published var searchQuery = ""
-    @Published var isLoading = false //
+@MainActor
+class MovieListViewModel: ObservableObject {
+    @Published var movies: [Movie] = []
+    @Published var searchQuery = "" {
+        didSet { handleSearchQueryChange() }
+    }
+    @Published var isLoading = false
     @Published var page = 1
     
     private var canLoadMore = true
-    private var cancellables = Set<AnyCancellable>() // Store Combine subscriptions
+    private var searchTask: Task<Void, Never>? // debounce task
     
     init() {
-        $searchQuery
-            .removeDuplicates()
-            .debounce(for: .milliseconds(400), scheduler: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                guard let self = self else { return }
-                let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                // Trigger search only when empty (fallback) or length >= 2
-                if trimmed.isEmpty || trimmed.count >= 2 {
-                    self.resetSearch()
-                }
-            }
-            .store(in: &cancellables)
-        // Preload any cached movies for initial/default query before first network call
         preloadCached()
     }
     
@@ -42,31 +31,42 @@ class MovieListViewModel: ObservableObject { // what  is observableobject: A pro
         if !cached.isEmpty { movies = cached }
     }
     
-    func fetchMovies() {
+    private func handleSearchQueryChange() {
+        let trimmed = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Cancel previous debounce
+        searchTask?.cancel() //Cancels the previous task if user keeps typing
+        searchTask = Task { [weak self] in
+            // Debounce 400ms
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            guard let self = self, !Task.isCancelled else { return }
+            if trimmed.isEmpty || trimmed.count >= 2 { self.resetSearch() }
+        }
+    }
+    
+    func fetchMovies() { // public trigger (infinite scroll / onAppear)
+        //is loading: must not already be fetching movies,
+        //must be true (means there are more pages left)
         guard !isLoading, canLoadMore else { return }
+        Task { await loadMovies() }
+    }
+    
+    private func loadMovies() async {
         isLoading = true
-
-        APIManager.shared.fetchMovies(search: currentQueryOrDefault(), page: page) { result in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                switch result {
-                case .success(let fetchedMovies):
-                    if fetchedMovies.isEmpty {
-                        self.canLoadMore = false
-                    } else {
-                        self.movies.append(contentsOf: fetchedMovies)
-                        // Persist newly fetched movies (avoid duplicates)
-                        CoreDataManager.shared.upsertMovies(fetchedMovies)
-                        self.page += 1
-                    }
-                case .failure(let error):
-                    print("Error fetching movies: \(error)")
-                    // Offline / failure fallback: show cached if we currently have none
-                    if self.movies.isEmpty {
-                        let cached = CoreDataManager.shared.loadCachedMovies(search: self.currentQueryOrDefault())
-                        if !cached.isEmpty { self.movies = cached }
-                    }
-                }
+        defer { isLoading = false } // automatically reset after function ends
+        do {
+            let fetched = try await APIManager.shared.fetchMovies(search: currentQueryOrDefault(), page: page)
+            if fetched.isEmpty {
+                canLoadMore = false
+            } else {
+                movies.append(contentsOf: fetched)
+                CoreDataManager.shared.upsertMovies(fetched)
+                page += 1
+            }
+        } catch {
+            print("Error fetching movies: \(error)")
+            if movies.isEmpty { // offline fallback
+                let cached = CoreDataManager.shared.loadCachedMovies(search: currentQueryOrDefault())
+                if !cached.isEmpty { movies = cached }
             }
         }
     }
@@ -75,7 +75,7 @@ class MovieListViewModel: ObservableObject { // what  is observableobject: A pro
         page = 1
         movies.removeAll()
         canLoadMore = true
-        preloadCached() // show cached instantly while network fetch occurs
+        preloadCached() // show cached instantly
         fetchMovies()
     }
 }
