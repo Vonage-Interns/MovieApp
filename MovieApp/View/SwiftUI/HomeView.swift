@@ -32,5 +32,6 @@ struct HomeView: View {
         }
         .environmentObject(favoritesManager) // Provide to subtree
         .onAppear { favoritesManager.loadPersisted(for: userID) }
+        .accessibilityIdentifier("homeTabView") // Added for UI testing
     }
 }

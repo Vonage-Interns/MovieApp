@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import MovieApp
 
 final class MovieAppUITestsLaunchTests: XCTestCase {
 

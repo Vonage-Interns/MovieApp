@@ -23,6 +23,11 @@ class CoreDataManager: NSObject { // Exposed to Objective-C
     
     var context: NSManagedObjectContext { persistentContainer.viewContext }
     
+    //Add this to support testing
+      func setPersistentContainerForTesting(_ container: NSPersistentContainer) {
+          self.persistentContainer = container
+      }
+    
     func saveContext() {
         if context.hasChanges {
             do { try context.save() } catch { print("Failed saving context: \(error)") }

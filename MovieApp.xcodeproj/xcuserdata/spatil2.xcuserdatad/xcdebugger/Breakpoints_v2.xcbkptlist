@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "BDC47EDC-FC39-4ED6-A331-2BFC65AC7BAE"
+            uuid = "42637108-7033-4B9E-A966-23366C080607"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "MovieApp/objpractice.m"
+            filePath = "MovieAppUITests/MovieAppUITests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "24"
-            endingLineNumber = "24"
-            landmarkName = "-testExample"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
+            landmarkName = "test_signInFailure()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

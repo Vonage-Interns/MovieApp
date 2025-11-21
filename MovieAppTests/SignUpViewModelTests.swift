@@ -6,30 +6,78 @@
 //
 
 import XCTest
+import CoreData
+@testable import MovieApp
 
 final class SignUpViewModelTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    var viewModel: SignUpViewModel!
+    
+    override func setUp() {
+        super.setUp()
+        viewModel = SignUpViewModel()
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    //Tests for validateInputs
+    func testValidateInputs_WhenUsernameIsEmpty() {
+        let result = viewModel.validateInputs(username: "", password: "123456", email: "test@mail.com")
+        XCTAssertEqual(result, "Username cannot be empty")
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func testValidateInputs_WhenEmailIsEmpty() {
+        let result = viewModel.validateInputs(username: "user", password: "123456", email: "")
+        XCTAssertEqual(result, "Email cannot be empty")
     }
+    
+    func testValidateInputs_WhenPasswordIsEmpty() {
+        let result = viewModel.validateInputs(username: "user", password: "", email: "test@mail.com")
+        XCTAssertEqual(result, "Password cannot be empty")
+    }
+    
+    func testValidateInputs_WhenUsernameTooShort() {
+        let result = viewModel.validateInputs(username: "abc", password: "123456", email: "test@mail.com")
+        XCTAssertEqual(result, "Username and Password must be at least 5 characters long")
+    }
+    
+    func testValidateInputs_WhenPasswordTooShort() {
+        let result = viewModel.validateInputs(username: "username", password: "123", email: "test@mail.com")
+        XCTAssertEqual(result, "Username and Password must be at least 5 characters long")
+    }
+    
+    func testValidateInputs_WhenEmailInvalid() {
+        let result = viewModel.validateInputs(username: "username", password: "123456", email: "invalidemail")
+        XCTAssertEqual(result, "Invalid email format")
+    }
+    
+    func testValidateInputs_WhenValidInputs() {
+        let result = viewModel.validateInputs(username: "validUser", password: "123456", email: "test@mail.com")
+        XCTAssertNil(result)
+    }
+    
+    
+    //Tests for registerUser
+    func test_registerUser_UserAlreadyExists() {
+        let result = viewModel.registerUser(username: "testuser2" , password: "testuser2", email: "testuser2@gmail.com")
+        XCTAssertFalse(result)
+    }
+    
+    
+    
+    
+
+
+
+
+
+
+
+    
+    
+    
 
 }

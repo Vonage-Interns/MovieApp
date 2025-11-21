@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import MovieApp
 
 final class MovieAppUITests: XCTestCase {
 
@@ -22,14 +23,7 @@ final class MovieAppUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
+    
 
     @MainActor
     func testLaunchPerformance() throws {
@@ -40,4 +34,48 @@ final class MovieAppUITests: XCTestCase {
             }
         }
     }
+    
+    func test_signInSuccess() throws {
+            let app = XCUIApplication()
+                    app.launch()
+        
+            // Find the text fields – update identifiers as needed
+            let emailField = app.textFields["emailTextField"]
+            let passwordField = app.secureTextFields["passwordTextField"]
+            let loginButton = app.buttons["loginButton"]
+
+            // Interact with UI
+            emailField.tap()
+            emailField.typeText("testuser2@gmail.com")
+
+            passwordField.tap()
+            passwordField.typeText("testuser2")
+
+            loginButton.tap()
+
+            // Assert new screen appears or an element exists
+                    let homeLabel = app.staticTexts["Movies"]
+            XCTAssertTrue(homeLabel.waitForExistence(timeout: 5))
+        
+                
+        }
+    
+    func test_signInFailure() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        app.textFields["emailTextField"].tap()
+        app.textFields["emailTextField"].typeText("wrong@example.com")
+
+        app.secureTextFields["passwordTextField"].tap()
+        app.secureTextFields["passwordTextField"].typeText("wrongpass")
+
+        app.buttons["loginButton"].tap()
+
+        let alert = app.alerts["Error"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.staticTexts["Invalid credentials"].exists)
+
+    }
+
 }
