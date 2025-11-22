@@ -9,7 +9,8 @@ import Kingfisher // Added for images
 
 struct FavoritesView: View {
     @EnvironmentObject var favoritesManager: FavoritesManager // Use shared manager
-    
+    @State private var showConfirmDelete = false
+    @State private var selectedMovie: Movie?
     var body: some View {
         NavigationView {
             Group {
@@ -36,11 +37,23 @@ struct FavoritesView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     Spacer()
-                                    Button(action: { favoritesManager.toggleFavorite(movie) }) {
+                                    Button {
+                                        selectedMovie = movie
+                                        showConfirmDelete = true
+                                    } label: {
                                         Image(systemName: "trash")
                                             .foregroundColor(.red)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
+                                }
+                                .alert("Are you sure you want to delete this favorite?",
+                                       isPresented: $showConfirmDelete) {
+                                    Button("Cancel", role: .cancel) {}
+                                    Button("Confirm", role: .destructive) {
+                                        if let movie = selectedMovie {
+                                            favoritesManager.toggleFavorite(movie)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -50,6 +63,6 @@ struct FavoritesView: View {
             }
             .navigationTitle("Favorites")
         }
-    
+        
     }
 }
